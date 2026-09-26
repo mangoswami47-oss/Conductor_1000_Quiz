@@ -47,19 +47,20 @@ button{font:inherit}
 .toast{position:fixed;left:50%;bottom:16px;transform:translate(-50%,20px);opacity:0;transition:.25s;background:rgba(5,10,20,.9);border:1px solid var(--line);padding:9px 14px;border-radius:999px;font-size:11px;z-index:200}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:720px){.top{height:55px}.brand h1{font-size:15px}.brand small,.topright .pill{display:none}.dashboard{padding:9px}.schedule th{font-size:16px}.schedule td.day{font-size:16px}.schedule td.slot{font-size:12px}.qcard{padding:12px}.question{font-size:clamp(16px,5vw,23px)}.options{grid-template-columns:1fr;gap:6px}.opt{min-height:44px}.controls{gap:4px}.btn{font-size:9px;padding:9px 3px}}
 @media(max-height:680px){.qcard{padding:9px}.question{font-size:clamp(15px,2.8vw,21px);margin-bottom:7px}.opt{min-height:40px;padding:6px 8px}}
-.slot.missing{filter:saturate(.25);opacity:.55;cursor:not-allowed!important}.loadStatus{font-size:10px;color:var(--muted);margin-left:auto}.loadStatus.ok{color:#69db7c}.loadStatus.err{color:#ff8787} .importBtn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:rgba(255,255,255,.08);padding:7px 10px;border-radius:10px;font-size:10px;cursor:pointer}.importBtn input{display:none} .loadDetail{display:none}
-</style>
+.slot.missing{filter:saturate(.25);opacity:.55;cursor:not-allowed!important}.loadStatus{font-size:10px;color:var(--muted);margin-left:auto}.loadStatus.ok{color:#69db7c}.loadStatus.err{color:#ff8787}</style>
+<!-- SheetJS Library inclusion for robust Excel parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="app">
 <header class="top glass">
  <div class="brand"><div class="logo">🎓</div><div><h1>Gohil • Hyper Quiz</h1><small>Excel Question Bank • Interactive Study Dashboard</small></div></div>
- <div class="topright"><span class="pill">Questions <b id="qTotal">0</b></span><span class="pill">High Score <b id="high">0%</b></span><button class="icon" id="sound">🔊</button><button class="icon" id="reset">↻</button></div>
+ <div class="topright"><span class="loadStatus" id="loadStatus">Loading Excel...</span><span class="pill">Questions <b id="qTotal">0</b></span><span class="pill">High Score <b id="high">0%</b></span><button class="icon" id="sound">🔊</button><button class="icon" id="reset">↻</button></div>
 </header>
 <main class="screen">
 <section class="dashboard glass" id="dashboard">
- <div class="head"><div><h2>📅 Weekly Study Schedule</h2><p>Image પ્રમાણે Morning • Afternoon • Night columns. દરેક subject tab અલગ રંગમાં છે.</p></div><span class="pill">14 Subjects • 1000 Questions</span><label id="excelFallback" class="importBtn" style="display:none">📥 Select Excel<input id="excelPicker" type="file" accept=".xlsx,.xls"></label></div>
- <div id="loadDetail" class="loadDetail"></div><div class="scheduleWrap"><table class="schedule" id="schedule"></table></div>
+ <div class="head"><div><h2>📅 Weekly Study Schedule</h2><p>Image પ્રમાણે Morning • Afternoon • Night columns. દરેક subject tab અલગ રંગમાં છે.</p></div><span class="pill">14 Subjects • 1000 Questions</span></div>
+ <div class="scheduleWrap"><table class="schedule" id="schedule"></table></div>
  <div class="legend"><span>☀ Morning</span><span>🌤 Afternoon</span><span>🌙 Night</span><span>💾 Auto Save</span><span>🔊 Answer Sound</span></div>
 </section>
 <section class="quiz" id="quiz"><div class="quizPanel glass">
@@ -78,108 +79,14 @@ let QUESTION_BANK=[];
 const SCHEDULE=[["ગુજરાતી વ્યાકરણ","Computer","English Grammar","GSRTC નિગમ","મોટર વ્હીકલ","રોડ સેફ્ટી"],["English Grammar","ગુજરાતી વ્યાકરણ","ગણિત","રિઝનીંગ","કંડક્ટરની ફરજો","પ્રાથમિક સારવાર"],["Computer","ગુજરાતી વ્યાકરણ","History","Geography","Current affairs","લગેજ"],["ગુજરાતી વ્યાકરણ","Computer","ગણિત","રિઝનીંગ","GSRTC નિગમ","મોટર વ્હીકલ"],["English Grammar","ગુજરાતી વ્યાકરણ","History","Geography","Current affairs","રોડ સેફ્ટી"],["Computer","English Grammar","કંડક્ટરની ફરજો","પ્રાથમિક સારવાર","લગેજ","ગણિત"],["ગુજરાતી વ્યાકરણ","Computer","English Grammar","રિઝનીંગ","GSRTC નિગમ","Current affairs"]];
 const DAYS=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const COLORS=["#ff6b6b","#ffa94d","#ffd43b","#69db7c","#38d9a9","#4dabf7","#748ffc","#9775fa","#da77f2","#f06595","#20c997","#82c91e","#e599f7","#339af0","#ff8787","#fcc419","#51cf66","#22b8cf","#845ef7","#be4bdb","#fa5252","#fd7e14","#15aabf","#94d82d","#5c7cfa","#cc5de8","#f783ac","#12b886","#fab005","#228be6","#7950f2","#e64980","#40c057","#1098ad","#f08c00","#6741d9","#d6336c","#2f9e44","#0ca678","#1971c2","#5f3dc4","#a61e4d"];
-const COUNTS={"Computer":197,"કંડક્ટરની ફરજો":74,"પ્રાથમિક સારવાર":50,"લગેજ":75,"GSRTC નિગમ":75,"મોટર વ્હીકલ":75,"રોડ સેફ્ટી":75,"ગણિત":75,"રિઝનીંગ":50,"ગુજરાતી વ્યાકરણ":50,"English Grammar":50,"History":50,"Geography":50,"Current affairs":50};
 const STORE="GOHIL_HYPER_QUIZ_2026";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Excel loader: reads ./Question Bank.xlsx directly in the browser.
-// No questions are embedded in index.html. Replace the Excel file on GitHub
-// Pages and refresh the site; the quiz will use that workbook.
+// Robust Excel loader using SheetJS to read Question Bank.xlsx directly from GitHub Pages
 // ─────────────────────────────────────────────────────────────────────────────
-async function inflateRaw(bytes){
-  if(typeof DecompressionStream==="undefined") throw new Error("This browser does not support XLSX compression.");
-  const ds=new DecompressionStream("deflate-raw");
-  const stream=new Blob([bytes]).stream().pipeThrough(ds);
-  return new Uint8Array(await new Response(stream).arrayBuffer());
-}
-function u16(d,o){return d.getUint16(o,true)}
-function u32(d,o){return d.getUint32(o,true)}
-function findEOCD(d){
-  for(let i=d.byteLength-22;i>=Math.max(0,d.byteLength-65557);i--) if(u32(d,i)===0x06054b50)return i;
-  throw new Error("Invalid XLSX: ZIP end record not found.");
-}
-function zipEntries(bytes){
-  const d=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength), e=findEOCD(d);
-  const count=u16(d,e+10), size=u32(d,e+12), off=u32(d,e+16), out={};
-  let p=off;
-  for(let n=0;n<count;n++){
-    if(u32(d,p)!==0x02014b50) throw new Error("Invalid XLSX central directory.");
-    const method=u16(d,p+10), csize=u32(d,p+20), usize=u32(d,p+24), nl=u16(d,p+28), el=u16(d,p+30), cl=u16(d,p+32), lo=u32(d,p+42);
-    const name=new TextDecoder().decode(bytes.slice(p+46,p+46+nl));
-    out[name]={method,csize,usize,lo};
-    p+=46+nl+el+cl;
-  }
-  return out;
-}
-async function unzipFile(bytes,entries,name){
-  const e=entries[name]||entries["/"+name];
-  if(!e) throw new Error("XLSX entry not found: "+name);
-  const d=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
-  const p=e.lo;
-  if(u32(d,p)!==0x04034b50) throw new Error("Invalid XLSX local header.");
-  const nl=u16(d,p+26), el=u16(d,p+28), start=p+30+nl+el;
-  const raw=bytes.slice(start,start+e.csize);
-  if(e.method===0)return raw;
-  if(e.method===8)return await inflateRaw(raw);
-  throw new Error("Unsupported XLSX compression method: "+e.method);
-}
-function xmlText(node,tag){
-  const x=node.getElementsByTagName(tag)[0];
-  return x?x.textContent:"";
-}
-function colNumber(ref){
-  const m=String(ref).match(/^[A-Z]+/i);if(!m)return 0;
-  let n=0;for(const c of m[0].toUpperCase())n=n*26+c.charCodeAt(0)-64;return n-1;
-}
 function clean(v){return String(v??"").replace(/\s+/g," ").trim()}
-async function readXLSX(arrayBuffer){
-  const bytes=new Uint8Array(arrayBuffer), entries=zipEntries(bytes);
-  const decoder=new TextDecoder("utf-8");
-  const readText=async name=>decoder.decode(await unzipFile(bytes,entries,name));
-
-  const workbook=new DOMParser().parseFromString(await readText("xl/workbook.xml"),"application/xml");
-  const rels=new DOMParser().parseFromString(await readText("xl/_rels/workbook.xml.rels"),"application/xml");
-  const relMap={};
-  for(const r of Array.from(rels.getElementsByTagName("Relationship"))){
-    relMap[r.getAttribute("Id")]=r.getAttribute("Target");
-  }
-
-  let shared=[];
-  if(entries["xl/sharedStrings.xml"]){
-    const ss=new DOMParser().parseFromString(await readText("xl/sharedStrings.xml"),"application/xml");
-    for(const si of Array.from(ss.getElementsByTagName("si"))){
-      shared.push(Array.from(si.getElementsByTagName("t")).map(x=>x.textContent).join(""));
-    }
-  }
-
-  const sheets=[];
-  for(const sh of Array.from(workbook.getElementsByTagName("sheet"))){
-    const name=sh.getAttribute("name")||"Sheet";
-    const rid=sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id")||sh.getAttribute("r:id");
-    let target=relMap[rid]||"";
-    if(target.startsWith("/")) target=target.slice(1);
-    else if(!target.startsWith("xl/")) target="xl/"+target.replace(/^\\.\//,"");
-    const xml=new DOMParser().parseFromString(await readText(target),"application/xml");
-    const rows=[];
-    for(const row of Array.from(xml.getElementsByTagName("row"))){
-      const cells=[];
-      for(const c of Array.from(row.getElementsByTagName("c"))){
-        const ref=c.getAttribute("r")||"", idx=colNumber(ref);
-        const typ=c.getAttribute("t")||"", v=xmlText(c,"v"), inline=xmlText(c,"t");
-        let val="";
-        if(typ==="s")val=shared[Number(v)]??"";
-        else if(typ==="inlineStr")val=inline;
-        else if(typ==="b")val=v==="1"?"TRUE":"FALSE";
-        else val=v;
-        cells[idx]=val;
-      }
-      rows.push(cells);
-    }
-    sheets.push({name,rows});
-  }
-  return sheets;
-}
 function normalizeHeader(v){return clean(v).toUpperCase().replace(/[^A-Z0-9_]/g,"_")}
+
 function rowsToQuestions(rows,sheetName){
   if(!rows.length)return [];
   const headers=rows[0].map(normalizeHeader);
@@ -187,9 +94,14 @@ function rowsToQuestions(rows,sheetName){
   const pick=(r,...names)=>{for(const n of names){const i=idx[normalizeHeader(n)];if(i!==undefined&&r[i]!==undefined&&clean(r[i])!=="")return clean(r[i])}return""};
   const out=[];
   for(let i=1;i<rows.length;i++){
-    const r=rows[i], q=pick(r,"QUESTION","Question","question");
-    const options=[pick(r,"OPTION_A","Option A","A"),pick(r,"OPTION_B","Option B","B"),pick(r,"OPTION_C","Option C","C"),pick(r,"OPTION_D","Option D","D")];
-    let ans=pick(r,"CORRECT_ANSWER","Correct Answer","ANSWER","Answer").toUpperCase();
+    const r=rows[i], q=pick(r,"QUESTION","Question","question","પ્રશ્ન");
+    const options=[
+      pick(r,"OPTION_A","Option A","A","ઓપ્શન અ"),
+      pick(r,"OPTION_B","Option B","B","ઓપ્શન બ"),
+      pick(r,"OPTION_C","Option C","C","ઓપ્શન ક"),
+      pick(r,"OPTION_D","Option D","D","ઓપ્શન ડ")
+    ];
+    let ans=pick(r,"CORRECT_ANSWER","Correct Answer","ANSWER","Answer","સાચો જવાબ","જવાબ").toUpperCase();
     if(!["A","B","C","D"].includes(ans)){
       const num=Number(ans);if(num>=0&&num<4)ans="ABCD"[num];else if(num>=1&&num<=4)ans="ABCD"[num-1];
     }
@@ -206,52 +118,45 @@ function rowsToQuestions(rows,sheetName){
   }
   return out;
 }
+
 async function loadQuestionBankFromGitHub(){
   const status=$("loadStatus");
-  status.textContent="Loading Excel…";status.className="loadStatus";
-  const candidates=[
-    "./Question%20Bank.xlsx",
-    "./Question%20Bank%20.xlsx",
-    "./QuestionBank.xlsx",
-    "./question%20bank.xlsx",
-    "./questionbank.xlsx"
-  ];
-  let lastErr=null;
+  status.textContent="Loading Question Bank.xlsx…"; status.className="loadStatus";
   try{
-    for(const path of candidates){
-      try{
-        const url=new URL(path,location.href).href+"?v="+Date.now();
-        const res=await fetch(url,{cache:"no-store",credentials:"same-origin"});
-        if(!res.ok){lastErr=new Error(path+" -> HTTP "+res.status);continue}
-        const buf=await res.arrayBuffer();
-        const sheets=await readXLSX(buf);
-        const all=[];
-        for(const sh of sheets) all.push(...rowsToQuestions(sh.rows,sh.name));
-        if(!all.length){lastErr=new Error(path+" -> Excel read થયો પરંતુ valid questions મળ્યા નથી.");continue}
-        QUESTION_BANK=all;
-        status.textContent=`✓ Excel loaded • ${all.length} questions • ${new Set(all.map(x=>x.subject)).size} subjects`;
-        status.className="loadStatus ok";
-        buildSchedule();
-        toast(`Excel loaded: ${all.length} questions`);
-        return;
-      }catch(e){lastErr=e}
-    }
-    throw lastErr||new Error("Question Bank.xlsx not found");
-  }catch(err){
-    console.error("Excel loading error:",err);
-    status.textContent="⚠ Excel auto-load failed — choose the file below";
-    status.className="loadStatus err";
+    // Timestamp added as cache-buster so that newly uploaded Excel files load instantly
+    const excelUrl = './Question Bank.xlsx?t=' + new Date().getTime();
+    let response = await fetch(excelUrl);
+    if(!response.ok) throw new Error("HTTP error " + response.status);
+    let data = await response.arrayBuffer();
+    let workbook = XLSX.read(data, { type: 'array' });
+    
+    let all = [];
+    workbook.SheetNames.forEach(sheetName => {
+      let worksheet = workbook.Sheets[sheetName];
+      let rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      let parsed = rowsToQuestions(rows, sheetName);
+      all.push(...parsed);
+    });
+
+    if(!all.length) throw new Error("No questions found in Excel.");
+    QUESTION_BANK = all;
+    status.textContent = `Excel loaded • ${all.length} questions`;
+    status.className = "loadStatus ok";
     buildSchedule();
-    toast("GitHub પર Question Bank.xlsx મળ્યું નથી. નીચે Excel પસંદ કરો.");
-    const picker=$("excelFallback"); if(picker) picker.style.display="inline-flex";
-    const detail=$("loadDetail"); if(detail) detail.textContent=String(err?.message||err);
+    toast(`Question Bank.xlsx loaded: ${all.length} questions`);
+  }catch(err){
+    console.error(err);
+    status.textContent = "Excel load failed";
+    status.className = "loadStatus err";
+    buildSchedule();
+    toast("Question Bank.xlsx મળ્યું નથી અથવા format ખોટું છે.");
   }
 }
 
 let db=loadDB(), currentSubject="",currentIndex=0,pendingSubject="",pendingIndex=0;
 
 function $(id){return document.getElementById(id)}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&","<":"<",">":">",'"':""","'":"'"}[c]))}
 function loadDB(){try{return JSON.parse(localStorage.getItem(STORE)||'{"progress":{},"high":{},"sound":true}')}catch(e){return {progress:{},high:{},sound:true}}}
 function saveDB(){localStorage.setItem(STORE,JSON.stringify(db))}
 function groups(){const g={};for(const q of QUESTION_BANK)(g[q.subject]??=[]).push(q);return g}
@@ -290,18 +195,8 @@ function sound(type){if(!db.sound)return;try{const C=window.AudioContext||window
 $("start").onclick=startQuiz;$("next").onclick=next;$("back").onclick=back;$("skip").onclick=skip;$("finish").onclick=finish;$("scheduleBtn").onclick=scheduleBack;$("rSchedule").onclick=scheduleBack;$("retry").onclick=retry;$("reset").onclick=resetAll;
 $("sound").onclick=()=>{db.sound=!db.sound;$("sound").textContent=db.sound?"🔊":"🔇";saveDB()};$("sound").textContent=db.sound?"🔊":"🔇";
 buildSchedule();
-$("excelPicker")?.addEventListener("change",async e=>{
-  const file=e.target.files?.[0];if(!file)return;
-  try{
-    const sheets=await readXLSX(await file.arrayBuffer()),all=[];
-    for(const sh of sheets)all.push(...rowsToQuestions(sh.rows,sh.name));
-    if(!all.length)throw new Error("No valid questions found in selected Excel.");
-    QUESTION_BANK=all;buildSchedule();
-    $("loadStatus").textContent=`✓ Local Excel loaded • ${all.length} questions`;
-    $("loadStatus").className="loadStatus ok";
-    toast(`Excel loaded: ${all.length} questions`);
-  }catch(err){console.error(err);toast("આ Excel વાંચી શકાઈ નથી.")}
-});
 loadQuestionBankFromGitHub();
 </script>
-</body></html>
+</body>
+</html>
+
