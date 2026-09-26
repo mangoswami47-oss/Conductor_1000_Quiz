@@ -120,7 +120,8 @@ async function loadQuestionBankFromGitHub(){
   const status=$("loadStatus");
   status.textContent="Loading Excel…"; status.className="loadStatus";
   try{
-    const excelUrl = './Question Bank.xlsx?t=' + new Date().getTime();
+    // Updated file name with underscore to prevent space encoding issues in GitHub Pages
+    const excelUrl = './Question_Bank.xlsx?t=' + new Date().getTime();
     let response = await fetch(excelUrl);
     if(!response.ok) throw new Error("HTTP error " + response.status);
     let data = await response.arrayBuffer();
@@ -139,13 +140,13 @@ async function loadQuestionBankFromGitHub(){
     status.textContent = `Excel loaded • ${all.length} questions`;
     status.className = "loadStatus ok";
     buildSchedule();
-    toast(`Question Bank.xlsx loaded: ${all.length} questions`);
+    toast(`Question_Bank.xlsx loaded: ${all.length} questions`);
   }catch(err){
     console.error(err);
     status.textContent = "Excel load failed";
     status.className = "loadStatus err";
     buildSchedule();
-    toast("Question Bank.xlsx મળ્યું નથી અથવા format ખોટું છે.");
+    toast("Question_Bank.xlsx મળ્યું નથી અથવા format ખોટું છે.");
   }
 }
 
@@ -165,7 +166,7 @@ function buildSchedule(){
  $("qTotal").textContent=QUESTION_BANK.length;
  const hs=Object.values(db.high||{}).map(Number);$("high").textContent=(hs.length?Math.max(...hs):0)+"%";
 }
-function requestQuiz(s){if(!groups()[s]?.length){toast("આ subject Question Bank.xlsx માં મળ્યો નથી.");return}pendingSubject=s;let x=st(s),i=x.answers.findIndex(v=>v===null);pendingIndex=i<0?0:i;$("greet").textContent=greeting();$("greetInfo").textContent=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" • "+s;$("greetModal").classList.add("show");sound("click")}
+function requestQuiz(s){if(!groups()[s]?.length){toast("આ subject Question_Bank.xlsx માં મળ્યો નથી.");return}pendingSubject=s;let x=st(s),i=x.answers.findIndex(v=>v===null);pendingIndex=i<0?0:i;$("greet").textContent=greeting();$("greetInfo").textContent=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" • "+s;$("greetModal").classList.add("show");sound("click")}
 function startQuiz(){currentSubject=pendingSubject;currentIndex=pendingIndex;$("greetModal").classList.remove("show");$("dashboard").style.display="none";$("quiz").style.display="block";render()}
 function render(){
  const g=groups(),qs=g[currentSubject],s=st(currentSubject),q=qs[currentIndex],ans=s.answers[currentIndex];
@@ -195,4 +196,3 @@ loadQuestionBankFromGitHub();
 </script>
 </body>
 </html>
-
