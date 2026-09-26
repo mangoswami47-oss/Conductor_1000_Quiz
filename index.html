@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="gu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>Gohil • Hyper Quiz Dashboard</title>
+<style>
+:root{--bg:#07111f;--bg2:#111d36;--glass:rgba(255,255,255,.10);--glassD:rgba(6,12,25,.58);--line:rgba(255,255,255,.20);--text:#f8fbff;--muted:#b7c3da;--shadow:0 8px 32px rgba(0,0,0,.37)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:Inter,"Noto Sans Gujarati",system-ui,sans-serif;color:var(--text);background:
+radial-gradient(circle at 8% 10%,rgba(77,129,255,.32),transparent 29%),radial-gradient(circle at 92% 7%,rgba(191,91,255,.25),transparent 28%),
+radial-gradient(circle at 55% 110%,rgba(45,220,157,.13),transparent 30%),linear-gradient(135deg,var(--bg),var(--bg2))}
+button{font:inherit}
+.glass{background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.app{height:100dvh;padding:12px;display:flex;flex-direction:column;gap:12px}
+.top{height:62px;border-radius:20px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex:0 0 auto}
+.brand{display:flex;gap:10px;align-items:center}.logo{width:43px;height:43px;border-radius:14px;display:grid;place-items:center;font-size:21px;background:linear-gradient(135deg,#5da0ff,#a66bff)}
+.brand h1{font-size:19px;margin:0}.brand small{color:var(--muted);font-size:10px}
+.topright{display:flex;gap:7px;align-items:center}.pill,.icon{border:1px solid var(--line);background:rgba(255,255,255,.07);border-radius:999px;color:#fff;padding:7px 10px;font-size:10px}.icon{cursor:pointer;border-radius:11px}
+.screen{flex:1;min-height:0}.dashboard{height:100%;border-radius:22px;padding:13px;display:flex;flex-direction:column}
+.head{display:flex;justify-content:space-between;align-items:end;gap:10px;margin-bottom:10px}.head h2{font-size:18px;margin:0}.head p{margin:3px 0 0;color:var(--muted);font-size:10px}
+.scheduleWrap{min-height:0;flex:1;overflow:auto;border-radius:14px}
+.schedule{width:100%;min-width:940px;border-collapse:separate;border-spacing:0;table-layout:fixed}
+.schedule th,.schedule td{border-right:2px solid rgba(0,0,0,.45);border-bottom:2px solid rgba(0,0,0,.45)}
+.schedule th{height:47px;background:rgba(255,255,255,.90);color:#111;font-size:20px;font-weight:800}
+.schedule th.day{width:16%}.schedule th.afternoon{width:32%}.schedule th.night{width:52%}
+.schedule td.day{height:56px;background:rgba(255,255,255,.94);color:#111;font-size:20px;font-weight:800;padding:6px 9px}
+.schedule td.slot{height:56px;color:#111;font-size:15px;font-weight:800;padding:5px 7px;cursor:pointer;transition:transform .16s,filter .16s,box-shadow .16s;position:relative}
+.schedule td.slot:hover{transform:translateY(-2px);filter:brightness(1.08);box-shadow:inset 0 0 0 3px rgba(255,255,255,.75);z-index:2}
+.schedule td.slot:active{transform:scale(.98)}
+.schedule td.slot .count{display:block;font-size:8px;opacity:.72;margin-top:1px;font-weight:600}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.legend span{font-size:9px;color:var(--muted);border:1px solid var(--line);padding:5px 8px;border-radius:999px}
+.quiz{height:100%;display:none}.quizPanel{height:100%;border-radius:22px;padding:12px;display:flex;flex-direction:column}
+.quizHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.quizHead h2{font-size:18px;margin:0}.quizHead p{font-size:10px;color:var(--muted);margin:2px 0}
+.progBox{min-width:145px;text-align:right;color:var(--muted);font-size:10px}.prog{height:7px;margin-top:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#63a0ff,#b36dff);transition:.3s}
+.stage{min-height:0;flex:1;display:grid;place-items:center;padding:7px 0}.qcard{width:min(820px,100%);height:min(590px,100%);border-radius:22px;padding:18px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.qmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:9px;margin-bottom:9px}.question{font-size:clamp(18px,2.5vw,29px);line-height:1.28;font-weight:800;text-align:center;max-width:760px;margin:0 auto 14px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:9px;max-width:760px;width:100%;margin:auto}.opt{min-height:56px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(255,255,255,.06);color:#fff;padding:9px 11px;text-align:left;display:flex;align-items:flex-start;gap:9px;cursor:pointer;transition:.15s}
+.opt:hover:not(:disabled){background:rgba(121,169,255,.16);transform:translateY(-1px)}.opt b{width:27px;height:27px;flex:0 0 27px;border-radius:8px;background:rgba(255,255,255,.09);display:grid;place-items:center}
+.opt.correct{background:rgba(62,230,161,.16);border-color:#3ee6a1}.opt.wrong{background:rgba(255,91,119,.16);border-color:#ff5b77}.opt:disabled{cursor:default}
+.feedback{text-align:center;min-height:21px;font-size:12px;font-weight:800;margin-top:7px}.good{color:#3ee6a1}.bad{color:#ff6d86}.explain{text-align:center;min-height:15px;color:var(--muted);font-size:10px}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.btn{border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:11px;padding:10px 6px;font-size:10px;font-weight:800;cursor:pointer}.btn:hover:not(:disabled){background:rgba(255,255,255,.14)}.btn.primary{background:linear-gradient(135deg,rgba(91,151,255,.58),rgba(168,101,255,.54))}.btn:disabled{opacity:.35;cursor:not-allowed}
+.saveLine{display:flex;justify-content:space-between;color:var(--muted);font-size:9px;margin-top:5px}
+.modal{position:fixed;inset:0;display:none;place-items:center;padding:18px;background:rgba(2,5,12,.70);backdrop-filter:blur(12px);z-index:100}.modal.show{display:grid}
+.greetCard,.resultCard{width:min(540px,94vw);padding:28px;border-radius:26px;text-align:center}.gohil{font-size:clamp(38px,8vw,56px);font-weight:900}.greet{font-size:clamp(22px,5vw,34px);font-weight:800;margin-top:3px}.muted{font-size:11px;color:var(--muted);margin:8px 0 18px}.score{font-size:50px;font-weight:900;margin:12px}.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.rgrid div{padding:10px;border:1px solid var(--line);border-radius:12px}.rgrid b{display:block;font-size:19px}
+.toast{position:fixed;left:50%;bottom:16px;transform:translate(-50%,20px);opacity:0;transition:.25s;background:rgba(5,10,20,.9);border:1px solid var(--line);padding:9px 14px;border-radius:999px;font-size:11px;z-index:200}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:720px){.top{height:55px}.brand h1{font-size:15px}.brand small,.topright .pill{display:none}.dashboard{padding:9px}.schedule th{font-size:16px}.schedule td.day{font-size:16px}.schedule td.slot{font-size:12px}.qcard{padding:12px}.question{font-size:clamp(16px,5vw,23px)}.options{grid-template-columns:1fr;gap:6px}.opt{min-height:44px}.controls{gap:4px}.btn{font-size:9px;padding:9px 3px}}
+@media(max-height:680px){.qcard{padding:9px}.question{font-size:clamp(15px,2.8vw,21px);margin-bottom:7px}.opt{min-height:40px;padding:6px 8px}}
+.slot.missing{filter:saturate(.25);opacity:.55;cursor:not-allowed!important}.loadStatus{font-size:10px;color:var(--muted);margin-left:auto}.loadStatus.ok{color:#69db7c}.loadStatus.err{color:#ff8787} .importBtn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:rgba(255,255,255,.08);padding:7px 10px;border-radius:10px;font-size:10px;cursor:pointer}.importBtn input{display:none} .loadDetail{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top glass">
+ <div class="brand"><div class="logo">🎓</div><div><h1>Gohil • Hyper Quiz</h1><small>Excel Question Bank • Interactive Study Dashboard</small></div></div>
+ <div class="topright"><span class="pill">Questions <b id="qTotal">0</b></span><span class="pill">High Score <b id="high">0%</b></span><button class="icon" id="sound">🔊</button><button class="icon" id="reset">↻</button></div>
+</header>
+<main class="screen">
+<section class="dashboard glass" id="dashboard">
+ <div class="head"><div><h2>📅 Weekly Study Schedule</h2><p>Image પ્રમાણે Morning • Afternoon • Night columns. દરેક subject tab અલગ રંગમાં છે.</p></div><span class="pill">14 Subjects • 1000 Questions</span><label id="excelFallback" class="importBtn" style="display:none">📥 Select Excel<input id="excelPicker" type="file" accept=".xlsx,.xls"></label></div>
+ <div id="loadDetail" class="loadDetail"></div><div class="scheduleWrap"><table class="schedule" id="schedule"></table></div>
+ <div class="legend"><span>☀ Morning</span><span>🌤 Afternoon</span><span>🌙 Night</span><span>💾 Auto Save</span><span>🔊 Answer Sound</span></div>
+</section>
+<section class="quiz" id="quiz"><div class="quizPanel glass">
+ <div class="quizHead"><div><h2 id="title"></h2><p id="meta"></p></div><div class="progBox"><span id="progText"></span><div class="prog"><i id="prog"></i></div></div></div>
+ <div class="stage"><div class="qcard glass" id="qcard"></div></div>
+ <div class="controls"><button class="btn" id="next">Next ➜</button><button class="btn" id="skip">Skip ⏭</button><button class="btn" id="back">← Back</button><button class="btn" id="scheduleBtn">⌂ Schedule</button><button class="btn primary" id="finish">Finish ✓</button></div>
+ <div class="saveLine"><span>● Progress saved in browser</span><span id="answered"></span></div>
+</div></section>
+</main>
+</div>
+<div class="modal" id="greetModal"><div class="greetCard glass"><div style="font-size:34px">✨</div><div class="gohil">Gohil</div><div class="greet" id="greet"></div><div class="muted" id="greetInfo"></div><button class="btn primary" id="start" style="min-width:160px">Start Quiz →</button></div></div>
+<div class="modal" id="resultModal"><div class="resultCard glass"><h2>🏆 Quiz Result</h2><div class="muted" id="rsub"></div><div class="score" id="rscore">0%</div><div class="rgrid"><div><b id="rc">0</b>Correct</div><div><b id="rw">0</b>Wrong</div><div><b id="rs">0</b>Skipped</div></div><div class="muted" id="rmsg"></div><button class="btn primary" id="retry">↻ Retry</button> <button class="btn" id="rSchedule">⌂ Schedule</button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+let QUESTION_BANK=[];
+const SCHEDULE=[["ગુજરાતી વ્યાકરણ","Computer","English Grammar","GSRTC નિગમ","મોટર વ્હીકલ","રોડ સેફ્ટી"],["English Grammar","ગુજરાતી વ્યાકરણ","ગણિત","રિઝનીંગ","કંડક્ટરની ફરજો","પ્રાથમિક સારવાર"],["Computer","ગુજરાતી વ્યાકરણ","History","Geography","Current affairs","લગેજ"],["ગુજરાતી વ્યાકરણ","Computer","ગણિત","રિઝનીંગ","GSRTC નિગમ","મોટર વ્હીકલ"],["English Grammar","ગુજરાતી વ્યાકરણ","History","Geography","Current affairs","રોડ સેફ્ટી"],["Computer","English Grammar","કંડક્ટરની ફરજો","પ્રાથમિક સારવાર","લગેજ","ગણિત"],["ગુજરાતી વ્યાકરણ","Computer","English Grammar","રિઝનીંગ","GSRTC નિગમ","Current affairs"]];
+const DAYS=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const COLORS=["#ff6b6b","#ffa94d","#ffd43b","#69db7c","#38d9a9","#4dabf7","#748ffc","#9775fa","#da77f2","#f06595","#20c997","#82c91e","#e599f7","#339af0","#ff8787","#fcc419","#51cf66","#22b8cf","#845ef7","#be4bdb","#fa5252","#fd7e14","#15aabf","#94d82d","#5c7cfa","#cc5de8","#f783ac","#12b886","#fab005","#228be6","#7950f2","#e64980","#40c057","#1098ad","#f08c00","#6741d9","#d6336c","#2f9e44","#0ca678","#1971c2","#5f3dc4","#a61e4d"];
+const COUNTS={"Computer":197,"કંડક્ટરની ફરજો":74,"પ્રાથમિક સારવાર":50,"લગેજ":75,"GSRTC નિગમ":75,"મોટર વ્હીકલ":75,"રોડ સેફ્ટી":75,"ગણિત":75,"રિઝનીંગ":50,"ગુજરાતી વ્યાકરણ":50,"English Grammar":50,"History":50,"Geography":50,"Current affairs":50};
+const STORE="GOHIL_HYPER_QUIZ_2026";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Excel loader: reads ./Question Bank.xlsx directly in the browser.
+// No questions are embedded in index.html. Replace the Excel file on GitHub
+// Pages and refresh the site; the quiz will use that workbook.
+// ─────────────────────────────────────────────────────────────────────────────
+async function inflateRaw(bytes){
+  if(typeof DecompressionStream==="undefined") throw new Error("This browser does not support XLSX compression.");
+  const ds=new DecompressionStream("deflate-raw");
+  const stream=new Blob([bytes]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+function u16(d,o){return d.getUint16(o,true)}
+function u32(d,o){return d.getUint32(o,true)}
+function findEOCD(d){
+  for(let i=d.byteLength-22;i>=Math.max(0,d.byteLength-65557);i--) if(u32(d,i)===0x06054b50)return i;
+  throw new Error("Invalid XLSX: ZIP end record not found.");
+}
+function zipEntries(bytes){
+  const d=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength), e=findEOCD(d);
+  const count=u16(d,e+10), size=u32(d,e+12), off=u32(d,e+16), out={};
+  let p=off;
+  for(let n=0;n<count;n++){
+    if(u32(d,p)!==0x02014b50) throw new Error("Invalid XLSX central directory.");
+    const method=u16(d,p+10), csize=u32(d,p+20), usize=u32(d,p+24), nl=u16(d,p+28), el=u16(d,p+30), cl=u16(d,p+32), lo=u32(d,p+42);
+    const name=new TextDecoder().decode(bytes.slice(p+46,p+46+nl));
+    out[name]={method,csize,usize,lo};
+    p+=46+nl+el+cl;
+  }
+  return out;
+}
+async function unzipFile(bytes,entries,name){
+  const e=entries[name]||entries["/"+name];
+  if(!e) throw new Error("XLSX entry not found: "+name);
+  const d=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+  const p=e.lo;
+  if(u32(d,p)!==0x04034b50) throw new Error("Invalid XLSX local header.");
+  const nl=u16(d,p+26), el=u16(d,p+28), start=p+30+nl+el;
+  const raw=bytes.slice(start,start+e.csize);
+  if(e.method===0)return raw;
+  if(e.method===8)return await inflateRaw(raw);
+  throw new Error("Unsupported XLSX compression method: "+e.method);
+}
+function xmlText(node,tag){
+  const x=node.getElementsByTagName(tag)[0];
+  return x?x.textContent:"";
+}
+function colNumber(ref){
+  const m=String(ref).match(/^[A-Z]+/i);if(!m)return 0;
+  let n=0;for(const c of m[0].toUpperCase())n=n*26+c.charCodeAt(0)-64;return n-1;
+}
+function clean(v){return String(v??"").replace(/\s+/g," ").trim()}
+async function readXLSX(arrayBuffer){
+  const bytes=new Uint8Array(arrayBuffer), entries=zipEntries(bytes);
+  const decoder=new TextDecoder("utf-8");
+  const readText=async name=>decoder.decode(await unzipFile(bytes,entries,name));
+
+  const workbook=new DOMParser().parseFromString(await readText("xl/workbook.xml"),"application/xml");
+  const rels=new DOMParser().parseFromString(await readText("xl/_rels/workbook.xml.rels"),"application/xml");
+  const relMap={};
+  for(const r of Array.from(rels.getElementsByTagName("Relationship"))){
+    relMap[r.getAttribute("Id")]=r.getAttribute("Target");
+  }
+
+  let shared=[];
+  if(entries["xl/sharedStrings.xml"]){
+    const ss=new DOMParser().parseFromString(await readText("xl/sharedStrings.xml"),"application/xml");
+    for(const si of Array.from(ss.getElementsByTagName("si"))){
+      shared.push(Array.from(si.getElementsByTagName("t")).map(x=>x.textContent).join(""));
+    }
+  }
+
+  const sheets=[];
+  for(const sh of Array.from(workbook.getElementsByTagName("sheet"))){
+    const name=sh.getAttribute("name")||"Sheet";
+    const rid=sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id")||sh.getAttribute("r:id");
+    let target=relMap[rid]||"";
+    if(target.startsWith("/")) target=target.slice(1);
+    else if(!target.startsWith("xl/")) target="xl/"+target.replace(/^\\.\//,"");
+    const xml=new DOMParser().parseFromString(await readText(target),"application/xml");
+    const rows=[];
+    for(const row of Array.from(xml.getElementsByTagName("row"))){
+      const cells=[];
+      for(const c of Array.from(row.getElementsByTagName("c"))){
+        const ref=c.getAttribute("r")||"", idx=colNumber(ref);
+        const typ=c.getAttribute("t")||"", v=xmlText(c,"v"), inline=xmlText(c,"t");
+        let val="";
+        if(typ==="s")val=shared[Number(v)]??"";
+        else if(typ==="inlineStr")val=inline;
+        else if(typ==="b")val=v==="1"?"TRUE":"FALSE";
+        else val=v;
+        cells[idx]=val;
+      }
+      rows.push(cells);
+    }
+    sheets.push({name,rows});
+  }
+  return sheets;
+}
+function normalizeHeader(v){return clean(v).toUpperCase().replace(/[^A-Z0-9_]/g,"_")}
+function rowsToQuestions(rows,sheetName){
+  if(!rows.length)return [];
+  const headers=rows[0].map(normalizeHeader);
+  const idx={};headers.forEach((h,i)=>{if(h)idx[h]=i});
+  const pick=(r,...names)=>{for(const n of names){const i=idx[normalizeHeader(n)];if(i!==undefined&&r[i]!==undefined&&clean(r[i])!=="")return clean(r[i])}return""};
+  const out=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i], q=pick(r,"QUESTION","Question","question");
+    const options=[pick(r,"OPTION_A","Option A","A"),pick(r,"OPTION_B","Option B","B"),pick(r,"OPTION_C","Option C","C"),pick(r,"OPTION_D","Option D","D")];
+    let ans=pick(r,"CORRECT_ANSWER","Correct Answer","ANSWER","Answer").toUpperCase();
+    if(!["A","B","C","D"].includes(ans)){
+      const num=Number(ans);if(num>=0&&num<4)ans="ABCD"[num];else if(num>=1&&num<=4)ans="ABCD"[num-1];
+    }
+    if(!q||!["A","B","C","D"].includes(ans))continue;
+    out.push({
+      id:pick(r,"Q_ID","Question ID","ID")||String(i),
+      subject:pick(r,"SUBJECT","Subject","વિષય")||sheetName,
+      topic:pick(r,"TOPIC","Topic")||sheetName,
+      difficulty:pick(r,"DIFFICULTY","Difficulty")||"Practice",
+      question:q,options,answer:ans,
+      explanation:pick(r,"EXPLANATION","Explanation","સમજૂતી"),
+      hint:pick(r,"HINT","Hint")
+    });
+  }
+  return out;
+}
+async function loadQuestionBankFromGitHub(){
+  const status=$("loadStatus");
+  status.textContent="Loading Excel…";status.className="loadStatus";
+  const candidates=[
+    "./Question%20Bank.xlsx",
+    "./Question%20Bank%20.xlsx",
+    "./QuestionBank.xlsx",
+    "./question%20bank.xlsx",
+    "./questionbank.xlsx"
+  ];
+  let lastErr=null;
+  try{
+    for(const path of candidates){
+      try{
+        const url=new URL(path,location.href).href+"?v="+Date.now();
+        const res=await fetch(url,{cache:"no-store",credentials:"same-origin"});
+        if(!res.ok){lastErr=new Error(path+" -> HTTP "+res.status);continue}
+        const buf=await res.arrayBuffer();
+        const sheets=await readXLSX(buf);
+        const all=[];
+        for(const sh of sheets) all.push(...rowsToQuestions(sh.rows,sh.name));
+        if(!all.length){lastErr=new Error(path+" -> Excel read થયો પરંતુ valid questions મળ્યા નથી.");continue}
+        QUESTION_BANK=all;
+        status.textContent=`✓ Excel loaded • ${all.length} questions • ${new Set(all.map(x=>x.subject)).size} subjects`;
+        status.className="loadStatus ok";
+        buildSchedule();
+        toast(`Excel loaded: ${all.length} questions`);
+        return;
+      }catch(e){lastErr=e}
+    }
+    throw lastErr||new Error("Question Bank.xlsx not found");
+  }catch(err){
+    console.error("Excel loading error:",err);
+    status.textContent="⚠ Excel auto-load failed — choose the file below";
+    status.className="loadStatus err";
+    buildSchedule();
+    toast("GitHub પર Question Bank.xlsx મળ્યું નથી. નીચે Excel પસંદ કરો.");
+    const picker=$("excelFallback"); if(picker) picker.style.display="inline-flex";
+    const detail=$("loadDetail"); if(detail) detail.textContent=String(err?.message||err);
+  }
+}
+
+let db=loadDB(), currentSubject="",currentIndex=0,pendingSubject="",pendingIndex=0;
+
+function $(id){return document.getElementById(id)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function loadDB(){try{return JSON.parse(localStorage.getItem(STORE)||'{"progress":{},"high":{},"sound":true}')}catch(e){return {progress:{},high:{},sound:true}}}
+function saveDB(){localStorage.setItem(STORE,JSON.stringify(db))}
+function groups(){const g={};for(const q of QUESTION_BANK)(g[q.subject]??=[]).push(q);return g}
+function st(s){const g=groups(),n=(g[s]||[]).length;if(!db.progress[s]||db.progress[s].answers.length!==n)db.progress[s]={answers:Array(n).fill(null)};return db.progress[s]}
+function greeting(){const h=new Date().getHours();return h>=5&&h<12?"Good Morning":h>=12&&h<17?"Good Afternoon":h>=17&&h<21?"Good Evening":"Good Night"}
+function buildSchedule(){
+ const g=groups();let h="<thead><tr><th class='day'>Day</th><th>Morning</th><th class='afternoon' colspan='2'>Afternoon</th><th class='night' colspan='3'>Night</th></tr></thead><tbody>";
+ SCHEDULE.forEach((row,i)=>{h+=`<tr><td class="day">${DAYS[i]}</td>`;row.forEach((s,j)=>{let n=(g[s]||[]).length,a=n?st(s).answers.filter(v=>v!==null).length:0,missing=!n;h+=`<td class="slot ${missing?'missing':''}" data-sub="${esc(s)}" style="background:${COLORS[(i*6+j)%COLORS.length]}">${esc(s)}<span class="count">${missing?'Not found in Excel':a+'/'+n+' answered'}</span></td>`});h+="</tr>"});h+="</tbody>";$("schedule").innerHTML=h;
+ document.querySelectorAll(".slot").forEach(el=>el.onclick=()=>requestQuiz(el.dataset.sub));
+ $("qTotal").textContent=QUESTION_BANK.length;
+ const hs=Object.values(db.high||{}).map(Number);$("high").textContent=(hs.length?Math.max(...hs):0)+"%";
+}
+function requestQuiz(s){if(!groups()[s]?.length){toast("આ subject Question Bank.xlsx માં મળ્યો નથી.");return}pendingSubject=s;let x=st(s),i=x.answers.findIndex(v=>v===null);pendingIndex=i<0?0:i;$("greet").textContent=greeting();$("greetInfo").textContent=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" • "+s;$("greetModal").classList.add("show");sound("click")}
+function startQuiz(){currentSubject=pendingSubject;currentIndex=pendingIndex;$("greetModal").classList.remove("show");$("dashboard").style.display="none";$("quiz").style.display="block";render()}
+function render(){
+ const g=groups(),qs=g[currentSubject],s=st(currentSubject),q=qs[currentIndex],ans=s.answers[currentIndex];
+ $("title").textContent=currentSubject;$("meta").textContent=`${qs.length} Questions • ${s.answers.filter(v=>v!==null).length} answered`;
+ $("progText").textContent=`${currentIndex+1} / ${qs.length}`;$("prog").style.width=((currentIndex+1)/qs.length*100)+"%";
+ let o=q.options.map((v,i)=>{let L="ABCD"[i],c=ans?(L===q.answer?"correct":L===ans?"wrong":""):"";let text=v?esc(v):"<span style='opacity:.55'>Option text not provided in Excel</span>";return `<button class="opt ${c}" ${ans?"disabled":""} data-a="${L}"><b>${L}</b><span>${text}</span></button>`}).join("");
+ $("qcard").innerHTML=`<div class="qmeta"><span>QUESTION ${esc(q.id)}</span><span>${esc(q.difficulty)}</span></div><div class="question">${esc(q.question)}</div><div class="options">${o}</div><div class="feedback ${ans?(ans===q.answer?"good":"bad"):""}">${ans?(ans===q.answer?"✓ Correct Answer":"✕ Wrong • Correct: "+q.answer):""}</div><div class="explain">${ans&&q.explanation?esc(q.explanation):""}</div>`;
+ document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(b.dataset.a));
+ $("next").disabled=currentIndex>=qs.length-1;$("back").disabled=currentIndex<=0;$("skip").disabled=!!ans;$("finish").disabled=!s.answers.every(v=>v!==null);$("answered").textContent=`Answered ${s.answers.filter(v=>v!==null).length}/${qs.length}`;
+ fit();
+}
+function fit(){const c=$("qcard"),q=c.querySelector(".question");if(!q)return;let z=parseFloat(getComputedStyle(q).fontSize),n=0;while(c.scrollHeight>c.clientHeight+2&&n++<14){z=Math.max(14,z-1);q.style.fontSize=z+"px"}}
+function answer(a){const g=groups(),qs=g[currentSubject],s=st(currentSubject);if(s.answers[currentIndex]!==null)return;s.answers[currentIndex]=a;saveDB();sound(a===qs[currentIndex].answer?"good":"bad");render()}
+function next(){if(currentIndex<groups()[currentSubject].length-1){currentIndex++;render();sound("click")}}
+function back(){if(currentIndex>0){currentIndex--;render();sound("click")}}
+function skip(){if(st(currentSubject).answers[currentIndex]===null){currentIndex=Math.min(currentIndex+1,groups()[currentSubject].length-1);render();sound("click")}}
+function finish(){const qs=groups()[currentSubject],s=st(currentSubject);if(!s.answers.every(v=>v!==null)){toast("Finish માટે બધા questions answer કરો.");return}let c=s.answers.filter((a,i)=>a===qs[i].answer).length,w=qs.length-c,score=Math.round(c/qs.length*100);db.high[currentSubject]=Math.max(Number(db.high[currentSubject]||0),score);saveDB();$("rsub").textContent=currentSubject;$("rscore").textContent=score+"%";$("rc").textContent=c;$("rw").textContent=w;$("rs").textContent=0;$("rmsg").textContent=`High Score: ${db.high[currentSubject]}%`;$("resultModal").classList.add("show");sound("finish")}
+function scheduleBack(){$("resultModal").classList.remove("show");$("quiz").style.display="none";$("dashboard").style.display="block";buildSchedule()}
+function retry(){$("resultModal").classList.remove("show");currentIndex=0;render()}
+function resetAll(){if(!confirm("બધો progress અને high score reset કરવો છે?"))return;localStorage.removeItem(STORE);db=loadDB();$("quiz").style.display="none";$("dashboard").style.display="block";buildSchedule();toast("Progress reset")}
+function toast(t){const x=$("toast");x.textContent=t;x.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove("show"),1800)}
+function sound(type){if(!db.sound)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain(),n=c.currentTime;let f=type==="good"?820:type==="bad"?190:type==="finish"?960:520;o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(.055,n+.01);g.gain.exponentialRampToValueAtTime(.0001,n+.20);o.connect(g);g.connect(c.destination);o.start();o.stop(n+.22);setTimeout(()=>c.close(),300)}catch(e){}}
+$("start").onclick=startQuiz;$("next").onclick=next;$("back").onclick=back;$("skip").onclick=skip;$("finish").onclick=finish;$("scheduleBtn").onclick=scheduleBack;$("rSchedule").onclick=scheduleBack;$("retry").onclick=retry;$("reset").onclick=resetAll;
+$("sound").onclick=()=>{db.sound=!db.sound;$("sound").textContent=db.sound?"🔊":"🔇";saveDB()};$("sound").textContent=db.sound?"🔊":"🔇";
+buildSchedule();
+$("excelPicker")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{
+    const sheets=await readXLSX(await file.arrayBuffer()),all=[];
+    for(const sh of sheets)all.push(...rowsToQuestions(sh.rows,sh.name));
+    if(!all.length)throw new Error("No valid questions found in selected Excel.");
+    QUESTION_BANK=all;buildSchedule();
+    $("loadStatus").textContent=`✓ Local Excel loaded • ${all.length} questions`;
+    $("loadStatus").className="loadStatus ok";
+    toast(`Excel loaded: ${all.length} questions`);
+  }catch(err){console.error(err);toast("આ Excel વાંચી શકાઈ નથી.")}
+});
+loadQuestionBankFromGitHub();
+</script>
+</body></html>
