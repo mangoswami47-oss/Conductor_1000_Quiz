@@ -48,7 +48,7 @@ button{font:inherit}
 @media(max-width:720px){.top{height:55px}.brand h1{font-size:15px}.brand small,.topright .pill{display:none}.dashboard{padding:9px}.schedule th{font-size:16px}.schedule td.day{font-size:16px}.schedule td.slot{font-size:12px}.qcard{padding:12px}.question{font-size:clamp(16px,5vw,23px)}.options{grid-template-columns:1fr;gap:6px}.opt{min-height:44px}.controls{gap:4px}.btn{font-size:9px;padding:9px 3px}}
 @media(max-height:680px){.qcard{padding:9px}.question{font-size:clamp(15px,2.8vw,21px);margin-bottom:7px}.opt{min-height:40px;padding:6px 8px}}
 .slot.missing{filter:saturate(.25);opacity:.55;cursor:not-allowed!important}.loadStatus{font-size:10px;color:var(--muted);margin-left:auto}.loadStatus.ok{color:#69db7c}.loadStatus.err{color:#ff8787}</style>
-<!-- SheetJS Library inclusion for robust Excel parsing -->
+<!-- SheetJS Library for reading Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -81,9 +81,6 @@ const DAYS=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 const COLORS=["#ff6b6b","#ffa94d","#ffd43b","#69db7c","#38d9a9","#4dabf7","#748ffc","#9775fa","#da77f2","#f06595","#20c997","#82c91e","#e599f7","#339af0","#ff8787","#fcc419","#51cf66","#22b8cf","#845ef7","#be4bdb","#fa5252","#fd7e14","#15aabf","#94d82d","#5c7cfa","#cc5de8","#f783ac","#12b886","#fab005","#228be6","#7950f2","#e64980","#40c057","#1098ad","#f08c00","#6741d9","#d6336c","#2f9e44","#0ca678","#1971c2","#5f3dc4","#a61e4d"];
 const STORE="GOHIL_HYPER_QUIZ_2026";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Robust Excel loader using SheetJS to read Question Bank.xlsx directly from GitHub Pages
-// ─────────────────────────────────────────────────────────────────────────────
 function clean(v){return String(v??"").replace(/\s+/g," ").trim()}
 function normalizeHeader(v){return clean(v).toUpperCase().replace(/[^A-Z0-9_]/g,"_")}
 
@@ -121,9 +118,8 @@ function rowsToQuestions(rows,sheetName){
 
 async function loadQuestionBankFromGitHub(){
   const status=$("loadStatus");
-  status.textContent="Loading Question Bank.xlsx…"; status.className="loadStatus";
+  status.textContent="Loading Excel…"; status.className="loadStatus";
   try{
-    // Timestamp added as cache-buster so that newly uploaded Excel files load instantly
     const excelUrl = './Question Bank.xlsx?t=' + new Date().getTime();
     let response = await fetch(excelUrl);
     if(!response.ok) throw new Error("HTTP error " + response.status);
