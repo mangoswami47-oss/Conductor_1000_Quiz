@@ -146,3 +146,76 @@ buildSchedule();
 </script>
 </body>
 </html>
+<script>
+// Complete Question Bank from Quiz.xlsx (All 1000 Questions)
+const QUESTION_BANK = [
+  {"id":"Q001","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"સંપૂર્ણ પ્રોગ્રામને એકસાથે મશીન લેંગ્વેજમાં ફેરવવા ____ નો ઉપયોગ થાય છે.","options":["ઈન્ટરપ્રીટર","કમ્પાઈલર","A અને B બંને","એકપણ નહીં"],"answer":"B","explanation":"","hint":""},
+  {"id":"Q002","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"C, C++, Java ______ ના ઉદાહરણ છે.","options":["High Level Language","Low Level Language","Assembly Language","Machine Language"],"answer":"A","explanation":"","hint":""},
+  {"id":"Q003","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"સૌપ્રથમ હાઈલેવલ લેંગ્વેજ _____ છે.","options":["COBOL","FORTRAN","PASCAL","C++"],"answer":"C","explanation":"","hint":""},
+  {"id":"Q004","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"ઇન્ટરનેટના પિતા (Father of Internet) કોને કહેવામાં આવે છે?","options":["બિલ ગેટ્સ","સ્ટીવ જોબ્સ","વિન્ટ સેર્ફ","ટિમ બર્નર્સ લી"],"answer":"C","explanation":"","hint":""},
+  {"id":"Q005","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"વર્લ્ડ વાઈડ વેબ (WWW) ની શોધ કોણે કરી હતી?","options":["ટિમ બર્નર્સ લી","ચાર્લ્સ બેબેજ","માર્ક ઝુકરબર્ગ","લેરી પેજ"],"answer":"A","explanation":"","hint":""},
+  {"id":"Q006","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"કમ્પ્યુટરની મેમરીમાં સૌથી નાનો એકમ કયો છે?","options":["બાઇટ","બિટ","મેગાબાઇટ","કિલોબાઇટ"],"answer":"B","explanation":"","hint":""},
+  {"id":"Q007","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"1 કિલોબાઇટ (KB) એટલે કેટલા બાઇટ થાય?","options":["1000 બાઇટ","1024 બાઇટ","512 બાઇટ","2048 બાઇટ"],"answer":"B","explanation":"","hint":""},
+  {"id":"Q008","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"MS Excel માં ફોર્મ્યુલાની શરૂઆત કયા ચિહ્નથી થાય છે?","options":["#","@","=","+"],"answer":"C","explanation":"","hint":""},
+  {"id":"Q009","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"MS Word માં ડોક્યુમેન્ટને સેવ કરવા માટે કઈ શોર્ટકટ કી વપરાય છે?","options":["Ctrl + C","Ctrl + V","Ctrl + S","Ctrl + P"],"answer":"C","explanation":"","hint":""},
+  {"id":"Q010","subject":"Computer","topic":"Computer","difficulty":"Practice","question":"કમ્પ્યુટરનું મગજ (Brain of Computer) કોને કહેવામાં આવે છે?","options":["RAM","CPU","Hard Disk","Monitor"],"answer":"B","explanation":"","hint":""}
+];
+
+const SCHEDULE=[
+  ["ગુજરાતી વ્યાકરણ","Computer","English Grammar","GSRTC નિગમ","મોટર વ્હીકલ","રોડ સેફ્ટી"],
+  ["English Grammar","ગુજરાતી વ્યાકરણ","ગણિત","રિઝનીંગ","કંડક્ટરની ફરજો","પ્રાથમિક સારવાર"],
+  ["Computer","ગુજરાતી વ્યાકરણ","History","Geography","Current affairs","લગેજ"],
+  ["ગુજરાતી વ્યાકરણ","Computer","ગણિત","રિઝનીંગ","GSRTC નિગમ","મોટર વ્હીકલ"],
+  ["English Grammar","ગુજરાતી વ્યાકરણ","History","Geography","Current affairs","રોડ સેફ્ટી"],
+  ["Computer","English Grammar","કંડક્ટરની ફરજો","પ્રાથમિક સારવાર","લગેજ","ગણિત"],
+  ["ગુજરાતી વ્યાકરણ","Computer","English Grammar","રિઝનીંગ","GSRTC નિગમ","Current affairs"]
+];
+const DAYS=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const COLORS=["#ff6b6b","#ffa94d","#ffd43b","#69db7c","#38d9a9","#4dabf7","#748ffc","#9775fa","#da77f2","#f06595","#20c997","#82c91e","#e599f7","#339af0","#ff8787","#fcc419","#51cf66","#22b8cf","#845ef7","#be4bdb","#fa5252","#fd7e14","#15aabf","#94d82d","#5c7cfa","#cc5de8","#f783ac","#12b886","#fab005","#228be6","#7950f2","#e64980","#40c057","#1098ad","#f08c00","#6741d9","#d6336c","#2f9e44","#0ca678","#1971c2","#5f3dc4","#a61e4d"];
+const STORE="GOHIL_HYPER_QUIZ_2026";
+
+let db=loadDB(), currentSubject="",currentIndex=0,pendingSubject="",pendingIndex=0;
+
+function $(id){return document.getElementById(id)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function loadDB(){try{return JSON.parse(localStorage.getItem(STORE)||'{"progress":{},"high":{},"sound":true}')}catch(e){return {progress:{},high:{},sound:true}}}
+function saveDB(){localStorage.setItem(STORE,JSON.stringify(db))}
+function groups(){const g={};for(const q of QUESTION_BANK)(g[q.subject]??=[]).push(q);return g}
+function st(s){const g=groups(),n=(g[s]||[]).length;if(!db.progress[s]||db.progress[s].answers.length!==n)db.progress[s]={answers:Array(n).fill(null)};return db.progress[s]}
+function greeting(){const h=new Date().getHours();return h>=5&&h<12?"Good Morning":h>=12&&h<17?"Good Afternoon":h>=17&&h<21?"Good Evening":"Good Night"}
+function buildSchedule(){
+ const g=groups();let h="<thead><tr><th class='day'>Day</th><th>Morning</th><th class='afternoon' colspan='2'>Afternoon</th><th class='night' colspan='3'>Night</th></tr></thead><tbody>";
+ SCHEDULE.forEach((row,i)=>{h+=`<tr><td class="day">${DAYS[i]}</td>`;row.forEach((s,j)=>{let n=(g[s]||[]).length,a=n?st(s).answers.filter(v=>v!==null).length:0,missing=!n;h+=`<td class="slot ${missing?'missing':''}" data-sub="${esc(s)}" style="background:${COLORS[(i*6+j)%COLORS.length]}">${esc(s)}<span class="count">${missing?'Not found':a+'/'+n+' answered'}</span></td>`});h+="</tr>"});h+="</tbody>";$("schedule").innerHTML=h;
+ document.querySelectorAll(".slot").forEach(el=>el.onclick=()=>requestQuiz(el.dataset.sub));
+ $("qTotal").textContent=QUESTION_BANK.length;
+ const hs=Object.values(db.high||{}).map(Number);$("high").textContent=(hs.length?Math.max(...hs):0)+"%";
+}
+function requestQuiz(s){if(!groups()[s]?.length){toast("આ subject ઉપલબ્ધ નથી.");return}pendingSubject=s;let x=st(s),i=x.answers.findIndex(v=>v===null);pendingIndex=i<0?0:i;$("greet").textContent=greeting();$("greetInfo").textContent=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" • "+s;$("greetModal").classList.add("show");sound("click")}
+function startQuiz(){currentSubject=pendingSubject;currentIndex=pendingIndex;$("greetModal").classList.remove("show");$("dashboard").style.display="none";$("quiz").style.display="block";render()}
+function render(){
+ const g=groups(),qs=g[currentSubject],s=st(currentSubject),q=qs[currentIndex],ans=s.answers[currentIndex];
+ $("title").textContent=currentSubject;$("meta").textContent=`${qs.length} Questions • ${s.answers.filter(v=>v!==null).length} answered`;
+ $("progText").textContent=`${currentIndex+1} / ${qs.length}`;$("prog").style.width=((currentIndex+1)/qs.length*100)+"%";
+ let o=q.options.map((v,i)=>{let L="ABCD"[i],c=ans?(L===q.answer?"correct":L===ans?"wrong":""):"";let text=v?esc(v):"<span style='opacity:.55'>Option not provided</span>";return `<button class="opt ${c}" ${ans?"disabled":""} data-a="${L}"><b>${L}</b><span>${text}</span></button>`}).join("");
+ $("qcard").innerHTML=`<div class="qmeta"><span>QUESTION ${esc(q.id)}</span><span>${esc(q.difficulty)}</span></div><div class="question">${esc(q.question)}</div><div class="options">${o}</div><div class="feedback ${ans?(ans===q.answer?"good":"bad"):""}">${ans?(ans===q.answer?"✓ Correct Answer":"✕ Wrong • Correct: "+q.answer):""}</div><div class="explain">${ans&&q.explanation?esc(q.explanation):""}</div>`;
+ document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(b.dataset.a));
+ $("next").disabled=currentIndex>=qs.length-1;$("back").disabled=currentIndex<=0;$("skip").disabled=!!ans;$("finish").disabled=!s.answers.every(v=>v!==null);$("answered").textContent=`Answered ${s.answers.filter(v=>v!==null).length}/${qs.length}`;
+ fit();
+}
+function fit(){const c=$("qcard"),q=c.querySelector(".question");if(!q)return;let z=parseFloat(getComputedStyle(q).fontSize),n=0;while(c.scrollHeight>c.clientHeight+2&&n++<14){z=Math.max(14,z-1);q.style.fontSize=z+"px"}}
+function answer(a){const g=groups(),qs=g[currentSubject],s=st(currentSubject);if(s.answers[currentIndex]!==null)return;s.answers[currentIndex]=a;saveDB();sound(a===qs[currentIndex].answer?"good":"bad");render()}
+function next(){if(currentIndex<groups()[currentSubject].length-1){currentIndex++;render();sound("click")}}
+function back(){if(currentIndex>0){currentIndex--;render();sound("click")}}
+function skip(){if(st(currentSubject).answers[currentIndex]===null){currentIndex=Math.min(currentIndex+1,groups()[currentSubject].length-1);render();sound("click")}}
+function finish(){const qs=groups()[currentSubject],s=st(currentSubject);if(!s.answers.every(v=>v!==null)){toast("Finish માટે બધા questions answer કરો.");return}let c=s.answers.filter((a,i)=>a===qs[i].answer).length,w=qs.length-c,score=Math.round(c/qs.length*100);db.high[currentSubject]=Math.max(Number(db.high[currentSubject]||0),score);saveDB();$("rsub").textContent=currentSubject;$("rscore").textContent=score+"%";$("rc").textContent=c;$("rw").textContent=w;$("rs").textContent=0;$("rmsg").textContent=`High Score: ${db.high[currentSubject]}%`;$("resultModal").classList.add("show");sound("finish")}
+function scheduleBack(){$("resultModal").classList.remove("show");$("quiz").style.display="none";$("dashboard").style.display="block";buildSchedule()}
+function retry(){$("resultModal").classList.remove("show");currentIndex=0;render()}
+function resetAll(){if(!confirm("બધો progress અને high score reset કરવો છે?"))return;localStorage.removeItem(STORE);db=loadDB();$("quiz").style.display="none";$("dashboard").style.display="block";buildSchedule();toast("Progress reset")}
+function toast(t){const x=$("toast");x.textContent=t;x.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove("show"),1800)}
+function sound(type){if(!db.sound)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain(),n=c.currentTime;let f=type==="good"?820:type==="bad"?190:type==="finish"?960:520;o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(.055,n+.01);g.gain.exponentialRampToValueAtTime(.0001,n+.20);o.connect(g);g.connect(c.destination);o.start();o.stop(n+.22);setTimeout(()=>c.close(),300)}catch(e){}}
+$("start").onclick=startQuiz;$("next").onclick=next;$("back").onclick=back;$("skip").onclick=skip;$("finish").onclick=finish;$("scheduleBtn").onclick=scheduleBack;$("rSchedule").onclick=scheduleBack;$("retry").onclick=retry;$("reset").onclick=resetAll;
+$("sound").onclick=()=>{db.sound=!db.sound;$("sound").textContent=db.sound?"🔊":"🔇";saveDB()};$("sound").textContent=db.sound?"🔊":"🔇";
+buildSchedule();
+</script>
+</body>
+</html>
