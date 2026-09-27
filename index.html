@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Hyper Advance Interactive Quiz</title>
+<title>Conductor Exam Preparation Quiz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -100,7 +100,7 @@ h1{font-size:clamp(20px,3vw,31px);margin:0;letter-spacing:-.8px}
 <body>
 <div class="app">
 <header class="glass">
- <div class="brand"><div class="logo">QA</div><div><h1>HYPER ADVANCE QUIZ</h1><div class="sub">Glassmorphism • Offline Progress • Excel-Accurate Question Bank</div></div></div>
+ <div class="brand"><div class="logo">MG</div><div><h1>HYPER ADVANCE QUIZ</h1><div class="sub">Hyper Advance • Offline Progress • Excel-Accurate Question Bank</div></div></div>
  <div class="stats"><div class="stat">SUBJECTS<b id="subjectCount">14</b></div><div class="stat">QUESTIONS<b id="questionCount">1000</b></div></div>
 </header>
 
@@ -108,7 +108,7 @@ h1{font-size:clamp(20px,3vw,31px);margin:0;letter-spacing:-.8px}
 
 <section id="scheduleView" class="view active">
  <div class="schedule-shell glass">
-  <div class="section-title"><div><h2>📅 Weekly Neon Schedule</h2><span>Click any subject tab to open its quiz</span></div><span id="overallStat"></span></div>
+  <div class="section-title"><div><h2>📅 Weekly Schedule For Pushpendra Gohil</h2><span>Click any subject tab And Achiev Your Goal</span></div><span id="overallStat"></span></div>
   <div class="schedule-wrap">
    <table class="schedule">
     <thead><tr><th>DAY</th><th colspan="1">MORNING</th><th colspan="2">AFTERNOON</th><th colspan="3">NIGHT</th></tr></thead>
@@ -194,7 +194,7 @@ function escapeHTML(v){
 let greetingTimer=null;
 function greeting(){
  const h=new Date().getHours();
- const g=h<12?"Good Morning":h<17?"Good Afternoon":h<21?"Good Evening":"GooD NighT";
+ const g=h<12?"Good Morning Gohil":h<17?"Good Afternoon Gohil":h<21?"Good Evening Gohil":"GooD NighT Gohil";
  const el=document.getElementById("greeting");
  el.textContent=g; el.classList.add("show");
  clearTimeout(greetingTimer);
